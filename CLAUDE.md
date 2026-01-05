@@ -66,13 +66,13 @@ UserNeedVisualiser/
 
 ### 3. User Needs Management
 - Create, read, update, delete (CRUD) operations
-- Auto-generated IDs based on super group prefixes (AYK, CLI, PAT)
+- Auto-generated IDs based on super group prefixes (HMZ, OWN, TEN)
 - Manual ID override option
 - Full-screen modal form with escape key support
 
 ### 4. Filtering System
 - Filter by User Group
-- Filter by Super Group (aykua, clinic, medical_services_user)
+- Filter by Super Group (homezy_staff, property_owner, tenant)
 - Filter by Entity
 - Filter by Workflow Phase
 - Filter by Refined status
@@ -93,15 +93,15 @@ UserNeedVisualiser/
 
 ### 7. Super Group System
 Each user group belongs to a super group for ID prefix management:
-- **aykua** (Internal Staff)
-  - ID Prefix: `AYK`
+- **homezy_staff** (Internal Staff)
+  - ID Prefix: `HMZ`
   - Example groups: Admins, Developers, Security Officers
-- **clinic** (External Partners)
-  - ID Prefix: `CLI`
+- **property_owner** (External Partners)
+  - ID Prefix: `OWN`
   - Example groups: Landlords, Property Managers, Maintenance Staff
-- **medical_services_user** (End Users)
-  - ID Prefix: `PAT`
-  - Example groups: Prospective Renters, Customers, Patients
+- **tenant** (End Users)
+  - ID Prefix: `TEN`
+  - Example groups: Prospective Renters, Current Tenants
 
 ## API Endpoints
 
@@ -133,7 +133,7 @@ All endpoints support `demo_mode` query parameter (boolean) to switch between `d
 ### UserNeed
 ```typescript
 {
-  id: string                    // e.g., "CLI-009"
+  id: string                    // e.g., "OWN-009"
   userGroupId: string          // Reference to userGroup
   title: string
   description: string
@@ -155,7 +155,7 @@ All endpoints support `demo_mode` query parameter (boolean) to switch between `d
 {
   id: string                   // e.g., "landlord"
   name: string                 // e.g., "Landlord"
-  superGroup: string           // "aykua" | "clinic" | "medical_services_user"
+  superGroup: string           // "homezy_staff" | "property_owner" | "tenant"
 }
 ```
 
@@ -255,12 +255,12 @@ Claude Code can help you directly modify data files through natural language pro
 ## Homezy Demo Mode Examples
 
 The demo mode includes a fictional property letting app called "Homezy" with these user groups:
-- **Prospective Renter** (PAT prefix) - End users looking for properties
-- **Landlord** (CLI prefix) - Property owners
-- **Property Manager** (CLI prefix) - Managing multiple properties
-- **Homezy Admin** (AYK prefix) - Platform administrators
-- **Homezy Security Officer** (AYK prefix) - Security and compliance
-- **Maintenance Staff** (CLI prefix) - Property maintenance
+- **Prospective Renter** (TEN prefix) - End users looking for properties
+- **Landlord** (OWN prefix) - Property owners
+- **Property Manager** (OWN prefix) - Managing multiple properties
+- **Homezy Admin** (HMZ prefix) - Platform administrators
+- **Homezy Security Officer** (HMZ prefix) - Security and compliance
+- **Maintenance Staff** (OWN prefix) - Property maintenance
 
 ## Adding User Needs (Demo Mode Examples)
 
@@ -286,7 +286,7 @@ Add the following user needs for prospective_renter in demo mode:
 **Example Prompt:**
 ```
 Add a new user need for admin_user with:
-- ID: AYK-010
+- ID: HMZ-010
 - Title: "Export user activity reports"
 - Description: "Admins need to export comprehensive reports of user activity for compliance"
 - Entities: audit_log, user_profile
@@ -297,7 +297,7 @@ Add a new user need for admin_user with:
 
 **Example Prompt:**
 ```
-Update user need CLI-005:
+Update user need OWN-005:
 - Change the title to "Automated deposit return processing"
 - Add "payment_gateway" to the entities list
 ```
@@ -311,7 +311,7 @@ For all user needs with entity "payment", add workflow phase "financial_audit"
 
 **Example Prompt:**
 ```
-Delete user need PAT-003
+Delete user need TEN-003
 ```
 
 **Example Prompt (Conditional):**
@@ -353,7 +353,7 @@ Add a new workflow phase:
 Add a new user group:
 - ID: property_inspector
 - Name: Property Inspector
-- Super Group: clinic
+- Super Group: property_owner
 ```
 
 ## Batch Operations
@@ -417,7 +417,7 @@ What's the next available ID for homezy_admin user group in demo mode?
 
 **Example Prompt:**
 ```
-Renumber all landlord user needs to start from CLI-020 in sequential order
+Renumber all landlord user needs to start from OWN-020 in sequential order
 ```
 
 ## Tips for Working with Claude Code
@@ -510,7 +510,7 @@ See `UserNeedForm.tsx` for auto-generated vs manual ID fields with checkbox togg
 1. **Always read before edit**: Use Read tool before Edit tool
 2. **Type safety**: Leverage TypeScript types from `types.ts`
 3. **Filter consistency**: Clear conflicting filters to avoid empty results
-4. **ID prefixes**: Follow super group prefix system (AYK, CLI, PAT)
+4. **ID prefixes**: Follow super group prefix system (HMZ, OWN, TEN)
 5. **Accessibility**: Include ARIA labels and keyboard navigation
 6. **Responsive**: Test on mobile viewports
 7. **Demo mode first**: Test changes in demo mode before applying to real data

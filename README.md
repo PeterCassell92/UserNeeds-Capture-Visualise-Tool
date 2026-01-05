@@ -186,12 +186,10 @@ The easiest way to run the application is using Docker Compose:
 
 On your first visit (when `data.json` is empty or doesn't exist):
 1. You'll see a welcome modal
-2. Enter your first user group name (e.g., "Admin", "Customer")
-3. Select a super group:
-   - **Aykua** (Internal Staff - ID prefix: AYK)
-   - **Clinic** (External Partners - ID prefix: CLI)
-   - **Medical Services User** (End Users - ID prefix: PAT)
-4. Click "Create User Group"
+2. Create your first super group with a 3-letter prefix (e.g., "HMZ" for Homezy Staff)
+3. Enter your first user group name (e.g., "Admin", "Customer")
+4. Select the super group you just created
+5. Click "Create User Group"
 
 **Tip:** You can also try Demo Mode first to see how the app works.
 
@@ -280,11 +278,18 @@ The application uses JSON files for data storage:
 
 ```json
 {
+  "userSuperGroups": [
+    {
+      "id": "homezy_staff",
+      "name": "Homezy Staff",
+      "prefix": "HMZ"
+    }
+  ],
   "userGroups": [
     {
       "id": "admin",
       "name": "Admin",
-      "superGroup": "aykua"
+      "superGroup": "homezy_staff"
     }
   ],
   "entities": [
@@ -302,7 +307,7 @@ The application uses JSON files for data storage:
   ],
   "userNeeds": [
     {
-      "id": "AYK-001",
+      "id": "HMZ-001",
       "userGroupId": "admin",
       "title": "Monitor platform activity",
       "description": "...",
@@ -409,9 +414,9 @@ The application is designed to be domain-agnostic. You can adapt it by:
 4. **Organizing user groups into super groups** for better ID management
 
 The super group system allows you to categorize user groups and automatically prefix user need IDs:
-- **Aykua** (Internal) → AYK-001, AYK-002, etc.
-- **Clinic** (External Partners) → CLI-001, CLI-002, etc.
-- **Medical Services User** (End Users) → PAT-001, PAT-002, etc.
+- **Homezy Staff** (Internal) → HMZ-001, HMZ-002, etc.
+- **Property Owner** (External Partners) → OWN-001, OWN-002, etc.
+- **Tenant** (End Users) → TEN-001, TEN-002, etc.
 
 ## Notes
 
