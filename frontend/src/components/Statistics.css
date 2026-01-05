@@ -1,0 +1,185 @@
+.statistics {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statistics h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stat-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-section {
+  margin-top: 1.5rem;
+}
+
+.stat-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.stat-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.toggle-group-btn {
+  display: flex;
+  gap: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: white;
+}
+
+.toggle-group-btn button {
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: white;
+  color: #666;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-right: 1px solid #e0e0e0;
+}
+
+.toggle-group-btn button:last-child {
+  border-right: none;
+}
+
+.toggle-group-btn button:hover {
+  background: #f8f9fa;
+}
+
+.toggle-group-btn button.active {
+  background: #667eea;
+  color: white;
+}
+
+.toggle-group-btn button:focus {
+  outline: 2px solid #667eea;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.stat-bar {
+  margin-bottom: 0.75rem;
+}
+
+.stat-bar-clickable {
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: -0.25rem;
+  margin-right: -0.25rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.stat-bar-clickable:hover {
+  background: #f8f9fa;
+}
+
+.stat-bar-clickable:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.stat-bar-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.stat-bar-clickable .stat-bar-label {
+  font-weight: 500;
+}
+
+.stat-bar-clickable:hover .stat-bar-label {
+  color: #667eea;
+}
+
+.stat-bar-container {
+  position: relative;
+  height: 24px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.stat-bar-value {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.toggle-extended-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #667eea;
+  transition: all 0.2s;
+}
+
+.toggle-extended-btn:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
