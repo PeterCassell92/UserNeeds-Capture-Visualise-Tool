@@ -9,17 +9,16 @@ services:
     ports:
       - "8011:8000"
     volumes:
-      # Mount a data volume for persistent storage
-      # This allows the app to create data.json and data.demomode.json dynamically
-      - data-volume:/app/data
-      # Mount example and template files as read-only from project root
-      - ./data.example.json:/app/data/data.example.json:ro
-      - ./data.template.json:/app/data/data.template.json:ro
-      # Mount existing data.json if it exists
-      - ./data.json:/app/data/data.json
+      # Bind mount data files directly to project root for easy access
+      # Changes in container are immediately reflected on host
+      - ./data.json:/app/data.json
+      # Demo mode data stored in named volume (ephemeral, not synced to host)
+      - demo-data-volume:/app/demo-storage
+      - ./data.example.json:/app/data.example.json:ro
+      - ./data.template.json:/app/data.template.json:ro
     environment:
       - PYTHONUNBUFFERED=1
-      - DATA_DIR=/app/data
+      - DEMO_STORAGE_DIR=/app/demo-storage
     networks:
       - user-needs-network
     restart: unless-stopped
@@ -54,7 +53,6 @@ networks:
   user-needs-network:
     driver: bridge
 
-# Volume for persistent data storage
 volumes:
-  data-volume:
+  demo-data-volume:
     driver: local

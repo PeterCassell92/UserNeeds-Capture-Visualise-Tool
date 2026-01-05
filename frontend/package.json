@@ -9,15 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
+    "axios": "^1.6.5",
+    "d3": "^7.8.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "d3": "^7.8.5",
-    "axios": "^1.6.5"
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
-    "@types/d3": "^7.4.3",
     "@vitejs/plugin-react": "^4.2.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.11"

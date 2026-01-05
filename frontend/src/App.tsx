@@ -7,7 +7,8 @@ import Statistics from './components/Statistics'
 import NetworkGraph from './components/NetworkGraph'
 import { Header } from './components/Header'
 import { FirstTimeSetup } from './components/FirstTimeSetup'
-import { useDemoMode } from './hooks/useDemoMode'
+import { useAppDispatch, useAppSelector } from './store/hooks'
+import { fetchDemoMode, setDemoModeAsync } from './store/settingsSlice'
 import type { UserNeed, UserGroup, Entity, WorkflowPhase, Statistics as StatsType, Filters as FiltersType, UserNeedCreate, UserNeedUpdate } from './types'
 import './App.css'
 
@@ -17,7 +18,8 @@ type ViewType = 'table' | 'cards' | 'graph'
 type CardSize = 'normal' | 'large'
 
 function App() {
-  const [demoMode, setDemoMode] = useDemoMode()
+  const dispatch = useAppDispatch()
+  const demoMode = useAppSelector((state) => state.settings.demoMode)
   const [userNeeds, setUserNeeds] = useState<UserNeed[]>([])
   const [userGroups, setUserGroups] = useState<UserGroup[]>([])
   const [entities, setEntities] = useState<Entity[]>([])
@@ -40,17 +42,14 @@ function App() {
     refined: 'all'
   })
 
-  // Load initial data and check setup
+  // Fetch demo mode state from backend on initialization
   useEffect(() => {
-    checkSetup()
-  }, [])
-
-  // Reload data when demo mode changes
-  useEffect(() => {
-    if (!loading) {
-      loadData()
+    const initializeApp = async () => {
+      await dispatch(fetchDemoMode())
+      checkSetup()
     }
-  }, [demoMode])
+    initializeApp()
+  }, [dispatch])
 
   // Load data when filters change
   useEffect(() => {
@@ -81,12 +80,11 @@ function App() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const params = { demo_mode: demoMode }
       const [groupsRes, entitiesRes, phasesRes, statsRes] = await Promise.all([
-        axios.get<UserGroup[]>(`${API_BASE}/user-groups`, { params }),
-        axios.get<Entity[]>(`${API_BASE}/entities`, { params }),
-        axios.get<WorkflowPhase[]>(`${API_BASE}/workflow-phases`, { params }),
-        axios.get<StatsType>(`${API_BASE}/statistics`, { params })
+        axios.get<UserGroup[]>(`${API_BASE}/user-groups`),
+        axios.get<Entity[]>(`${API_BASE}/entities`),
+        axios.get<WorkflowPhase[]>(`${API_BASE}/workflow-phases`),
+        axios.get<StatsType>(`${API_BASE}/statistics`)
       ])
 
       setUserGroups(groupsRes.data)
@@ -104,7 +102,7 @@ function App() {
 
   const loadUserNeeds = async () => {
     try {
-      const params: Record<string, string | boolean> = { demo_mode: demoMode }
+      const params: Record<string, string> = {}
       if (filters.userGroupId) params.userGroupId = filters.userGroupId
       if (filters.entity) params.entity = filters.entity
       if (filters.workflowPhase) params.workflowPhase = filters.workflowPhase
@@ -115,7 +113,7 @@ function App() {
       setUserNeeds(res.data)
 
       // Refresh statistics
-      const statsRes = await axios.get<StatsType>(`${API_BASE}/statistics`, { params: { demo_mode: demoMode } })
+      const statsRes = await axios.get<StatsType>(`${API_BASE}/statistics`)
       setStatistics(statsRes.data)
     } catch (err) {
       setError('Failed to load user needs: ' + (err as Error).message)
@@ -124,7 +122,7 @@ function App() {
 
   const handleCreateNeed = async (needData: UserNeedCreate) => {
     try {
-      await axios.post(`${API_BASE}/user-needs`, needData, { params: { demo_mode: demoMode } })
+      await axios.post(`${API_BASE}/user-needs`, needData)
       await loadUserNeeds()
       setShowForm(false)
       setEditingNeed(null)
@@ -135,7 +133,7 @@ function App() {
 
   const handleUpdateNeed = async (needId: string, needData: UserNeedUpdate) => {
     try {
-      await axios.put(`${API_BASE}/user-needs/${needId}`, needData, { params: { demo_mode: demoMode } })
+      await axios.put(`${API_BASE}/user-needs/${needId}`, needData)
       await loadUserNeeds()
       setEditingNeed(null)
       setShowForm(false)
@@ -148,7 +146,7 @@ function App() {
     if (!confirm('Are you sure you want to delete this user need?')) return
 
     try {
-      await axios.delete(`${API_BASE}/user-needs/${needId}`, { params: { demo_mode: demoMode } })
+      await axios.delete(`${API_BASE}/user-needs/${needId}`)
       await loadUserNeeds()
     } catch (err) {
       alert('Failed to delete user need: ' + (err as Error).message)
@@ -157,7 +155,7 @@ function App() {
 
   const handleToggleRefined = async (needId: string, refined: boolean) => {
     try {
-      await axios.put(`${API_BASE}/user-needs/${needId}`, { refined }, { params: { demo_mode: demoMode } })
+      await axios.put(`${API_BASE}/user-needs/${needId}`, { refined })
       await loadUserNeeds()
     } catch (err: any) {
       alert('Failed to update refined status: ' + (err.response?.data?.detail || err.message))
@@ -199,8 +197,11 @@ function App() {
     setFilters(newFilters)
   }
 
-  const handleDemoModeToggle = (enabled: boolean) => {
-    setDemoMode(enabled)
+  const handleDemoModeToggle = async (enabled: boolean) => {
+    // Update demo mode on backend
+    await dispatch(setDemoModeAsync(enabled))
+    // Reload all data with new demo mode setting
+    await loadData()
   }
 
   // Render first-time setup modal

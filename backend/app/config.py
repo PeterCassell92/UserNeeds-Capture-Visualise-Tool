@@ -6,17 +6,16 @@ from pathlib import Path
 # Base directory - parent of the app directory
 BASE_DIR = Path(__file__).parent.parent
 
-# Data directory - use /app/data in Docker, otherwise parent of BASE_DIR
-DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR / "data"))
-# Fallback to BASE_DIR if data directory doesn't exist (local development)
-if not DATA_DIR.exists():
-    DATA_DIR = BASE_DIR.parent
+# Data file paths (in Docker: /app/, in local dev: backend/)
+DATA_FILE = BASE_DIR / "data.json"
 
-# Data file paths
-DATA_FILE = DATA_DIR / "data.json"
-DEMO_DATA_FILE = DATA_DIR / "data.demomode.json"
-EXAMPLE_DATA_FILE = DATA_DIR / "data.example.json"
-TEMPLATE_DATA_FILE = DATA_DIR / "data.template.json"
+# Demo data stored in separate volume mount (Docker) or temp directory (local)
+DEMO_STORAGE_DIR = Path(os.getenv("DEMO_STORAGE_DIR", BASE_DIR / "demo-storage"))
+DEMO_STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+DEMO_DATA_FILE = DEMO_STORAGE_DIR / "data.demomode.json"
+
+EXAMPLE_DATA_FILE = BASE_DIR / "data.example.json"
+TEMPLATE_DATA_FILE = BASE_DIR / "data.template.json"
 
 # Super group ID prefix mapping
 SUPER_GROUP_PREFIXES = {
