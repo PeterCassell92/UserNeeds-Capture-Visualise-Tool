@@ -165,7 +165,7 @@ function NetworkGraph({ userNeeds, userGroups, entities, workflowPhases }: Netwo
           if (!event.active) simulation.alphaTarget(0)
           d.fx = null
           d.fy = null
-        })
+        }) as any
       )
 
     // Add circles to nodes

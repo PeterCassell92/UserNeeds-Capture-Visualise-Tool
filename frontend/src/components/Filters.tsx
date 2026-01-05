@@ -1,4 +1,4 @@
-import type { Filters as FiltersType, UserGroup, Entity, WorkflowPhase, RefinedFilter } from '../types'
+import type { Filters as FiltersType, UserGroup, Entity, WorkflowPhase } from '../types'
 import './Filters.css'
 
 interface FiltersProps {

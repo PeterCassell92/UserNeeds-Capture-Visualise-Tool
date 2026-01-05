@@ -1,0 +1,374 @@
+{
+  "userGroups": [
+    {
+      "id": "prospective_renter",
+      "name": "Prospective Renter",
+      "superGroup": "medical_services_user"
+    },
+    {
+      "id": "landlord",
+      "name": "Landlord",
+      "superGroup": "clinic"
+    },
+    {
+      "id": "property_manager",
+      "name": "Property Manager",
+      "superGroup": "clinic"
+    },
+    {
+      "id": "homezy_admin",
+      "name": "Homezy Admin",
+      "superGroup": "aykua"
+    },
+    {
+      "id": "homezy_security_officer",
+      "name": "Homezy Security Officer",
+      "superGroup": "aykua"
+    },
+    {
+      "id": "maintenance_staff",
+      "name": "Maintenance Staff",
+      "superGroup": "clinic"
+    }
+  ],
+  "entities": [
+    {
+      "id": "property_listing",
+      "name": "Property Listing"
+    },
+    {
+      "id": "rental_application",
+      "name": "Rental Application"
+    },
+    {
+      "id": "viewing_request",
+      "name": "Viewing Request"
+    },
+    {
+      "id": "lease_agreement",
+      "name": "Lease Agreement"
+    },
+    {
+      "id": "payment",
+      "name": "Payment"
+    },
+    {
+      "id": "maintenance_request",
+      "name": "Maintenance Request"
+    },
+    {
+      "id": "inspection_report",
+      "name": "Inspection Report"
+    },
+    {
+      "id": "tenant_profile",
+      "name": "Tenant Profile"
+    },
+    {
+      "id": "reference_check",
+      "name": "Reference Check"
+    },
+    {
+      "id": "deposit",
+      "name": "Deposit"
+    }
+  ],
+  "workflowPhases": [
+    {
+      "id": "property_search",
+      "name": "Property Search"
+    },
+    {
+      "id": "application",
+      "name": "Application"
+    },
+    {
+      "id": "viewing",
+      "name": "Viewing"
+    },
+    {
+      "id": "reference_check",
+      "name": "Reference Check"
+    },
+    {
+      "id": "contract_signing",
+      "name": "Contract Signing"
+    },
+    {
+      "id": "move_in",
+      "name": "Move-in"
+    },
+    {
+      "id": "tenancy_management",
+      "name": "Tenancy Management"
+    },
+    {
+      "id": "maintenance",
+      "name": "Maintenance"
+    },
+    {
+      "id": "move_out",
+      "name": "Move-out"
+    },
+    {
+      "id": "deposit_return",
+      "name": "Deposit Return"
+    }
+  ],
+  "userNeeds": [
+    {
+      "id": "PAT-001",
+      "userGroupId": "prospective_renter",
+      "title": "Search for available properties",
+      "description": "Prospective renters need to search and filter available properties by location, price range, number of bedrooms, and amenities",
+      "entities": [
+        "property_listing"
+      ],
+      "workflowPhase": "property_search"
+    },
+    {
+      "id": "PAT-002",
+      "userGroupId": "prospective_renter",
+      "title": "Submit rental application online",
+      "description": "Prospective renters need to submit their rental application with personal details, employment information, and references digitally",
+      "entities": [
+        "rental_application",
+        "tenant_profile"
+      ],
+      "workflowPhase": "application"
+    },
+    {
+      "id": "PAT-003",
+      "userGroupId": "prospective_renter",
+      "title": "Schedule property viewings",
+      "description": "Prospective renters need to request and schedule viewing appointments for properties they're interested in",
+      "entities": [
+        "viewing_request",
+        "property_listing"
+      ],
+      "workflowPhase": "viewing"
+    },
+    {
+      "id": "PAT-004",
+      "userGroupId": "prospective_renter",
+      "title": "Make online rental payments",
+      "description": "Renters need to pay monthly rent, deposit, and other fees securely through the platform",
+      "entities": [
+        "payment",
+        "deposit"
+      ],
+      "workflowPhase": "tenancy_management"
+    },
+    {
+      "id": "PAT-005",
+      "userGroupId": "prospective_renter",
+      "title": "Submit maintenance requests",
+      "description": "Tenants need to report maintenance issues, upload photos, and track the status of their requests",
+      "entities": [
+        "maintenance_request"
+      ],
+      "workflowPhase": "maintenance"
+    },
+    {
+      "id": "CLI-001",
+      "userGroupId": "landlord",
+      "title": "Create property listings",
+      "description": "Landlords need to create detailed property listings with photos, descriptions, pricing, and availability",
+      "entities": [
+        "property_listing"
+      ],
+      "workflowPhase": "property_search"
+    },
+    {
+      "id": "CLI-002",
+      "userGroupId": "landlord",
+      "title": "Review rental applications",
+      "description": "Landlords need to view and assess rental applications, including tenant profiles and reference checks",
+      "entities": [
+        "rental_application",
+        "tenant_profile",
+        "reference_check"
+      ],
+      "workflowPhase": "application"
+    },
+    {
+      "id": "CLI-003",
+      "userGroupId": "landlord",
+      "title": "Generate lease agreements",
+      "description": "Landlords need to create, customize, and send lease agreements to approved tenants for digital signing",
+      "entities": [
+        "lease_agreement"
+      ],
+      "workflowPhase": "contract_signing"
+    },
+    {
+      "id": "CLI-004",
+      "userGroupId": "landlord",
+      "title": "Track rental income",
+      "description": "Landlords need to monitor rental payments, view payment history, and receive notifications for late payments",
+      "entities": [
+        "payment"
+      ],
+      "workflowPhase": "tenancy_management"
+    },
+    {
+      "id": "CLI-005",
+      "userGroupId": "landlord",
+      "title": "Conduct move-out inspections",
+      "description": "Landlords need to document property condition during move-out, compare with move-in report, and process deposit returns",
+      "entities": [
+        "inspection_report",
+        "deposit"
+      ],
+      "workflowPhase": "move_out"
+    },
+    {
+      "id": "CLI-006",
+      "userGroupId": "property_manager",
+      "title": "Manage multiple properties",
+      "description": "Property managers need a dashboard to oversee multiple properties, track occupancy rates, and manage listings",
+      "entities": [
+        "property_listing"
+      ],
+      "workflowPhase": "property_search"
+    },
+    {
+      "id": "CLI-007",
+      "userGroupId": "property_manager",
+      "title": "Coordinate viewing schedules",
+      "description": "Property managers need to approve viewing requests, manage calendars, and coordinate with prospective tenants",
+      "entities": [
+        "viewing_request"
+      ],
+      "workflowPhase": "viewing"
+    },
+    {
+      "id": "CLI-008",
+      "userGroupId": "property_manager",
+      "title": "Oversee maintenance operations",
+      "description": "Property managers need to review maintenance requests, assign tasks to maintenance staff, and track completion",
+      "entities": [
+        "maintenance_request"
+      ],
+      "workflowPhase": "maintenance"
+    },
+    {
+      "id": "CLI-009",
+      "userGroupId": "property_manager",
+      "title": "Perform reference checks",
+      "description": "Property managers need to conduct background and reference checks on applicants and document findings",
+      "entities": [
+        "reference_check",
+        "rental_application"
+      ],
+      "workflowPhase": "reference_check"
+    },
+    {
+      "id": "AYK-001",
+      "userGroupId": "homezy_admin",
+      "title": "Monitor platform activity",
+      "description": "Admins need to view analytics on user registrations, property listings, applications, and transactions",
+      "entities": [
+        "property_listing",
+        "rental_application",
+        "payment"
+      ],
+      "workflowPhase": "tenancy_management"
+    },
+    {
+      "id": "AYK-002",
+      "userGroupId": "homezy_admin",
+      "title": "Manage user accounts",
+      "description": "Admins need to create, suspend, or delete user accounts for landlords, tenants, and property managers",
+      "entities": [
+        "tenant_profile"
+      ],
+      "workflowPhase": "application"
+    },
+    {
+      "id": "AYK-003",
+      "userGroupId": "homezy_admin",
+      "title": "Handle payment disputes",
+      "description": "Admins need to review and resolve payment disputes between landlords and tenants",
+      "entities": [
+        "payment",
+        "deposit"
+      ],
+      "workflowPhase": "tenancy_management"
+    },
+    {
+      "id": "AYK-004",
+      "userGroupId": "homezy_admin",
+      "title": "Configure system settings",
+      "description": "Admins need to manage platform configuration, fees, service charges, and payment gateway settings",
+      "entities": [
+        "payment"
+      ],
+      "workflowPhase": "tenancy_management"
+    },
+    {
+      "id": "AYK-005",
+      "userGroupId": "homezy_security_officer",
+      "title": "Review suspicious activities",
+      "description": "Security officers need to monitor and investigate potentially fraudulent listings, applications, or payment activities",
+      "entities": [
+        "property_listing",
+        "rental_application",
+        "payment"
+      ],
+      "workflowPhase": "application"
+    },
+    {
+      "id": "AYK-006",
+      "userGroupId": "homezy_security_officer",
+      "title": "Verify identity documents",
+      "description": "Security officers need to validate identity documents submitted by landlords and tenants during registration",
+      "entities": [
+        "tenant_profile",
+        "rental_application"
+      ],
+      "workflowPhase": "reference_check"
+    },
+    {
+      "id": "AYK-007",
+      "userGroupId": "homezy_security_officer",
+      "title": "Manage access controls",
+      "description": "Security officers need to configure user permissions and access levels across the platform",
+      "entities": [
+        "tenant_profile"
+      ],
+      "workflowPhase": "tenancy_management"
+    },
+    {
+      "id": "CLI-010",
+      "userGroupId": "maintenance_staff",
+      "title": "Receive maintenance assignments",
+      "description": "Maintenance staff need to receive notifications of assigned maintenance requests with property details and issue descriptions",
+      "entities": [
+        "maintenance_request"
+      ],
+      "workflowPhase": "maintenance"
+    },
+    {
+      "id": "CLI-011",
+      "userGroupId": "maintenance_staff",
+      "title": "Update task status",
+      "description": "Maintenance staff need to update the status of maintenance tasks and upload photos of completed work",
+      "entities": [
+        "maintenance_request"
+      ],
+      "workflowPhase": "maintenance"
+    },
+    {
+      "id": "CLI-012",
+      "userGroupId": "maintenance_staff",
+      "title": "Access property information",
+      "description": "Maintenance staff need to view property access details, contact information, and any special instructions",
+      "entities": [
+        "property_listing",
+        "maintenance_request"
+      ],
+      "workflowPhase": "maintenance"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+# Docker Compose version is now specified in the Compose file format itself
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: user-needs-backend
+    ports:
+      - "8011:8000"
+    volumes:
+      # Mount data files for persistence
+      - ./data.json:/app/data.json
+      - ./data.demomode.json:/app/data.demomode.json
+      - ./data.example.json:/app/data.example.json:ro
+      - ./data.template.json:/app/data.template.json:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - user-needs-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: user-needs-frontend
+    ports:
+      - "3011:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - user-needs-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  user-needs-network:
+    driver: bridge
+
+# Optional: Add a volume for persistent data
+# volumes:
+#   data:
+#     driver: local

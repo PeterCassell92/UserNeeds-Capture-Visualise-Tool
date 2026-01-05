@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a User Needs Management tool built with FastAPI (Python backend) and React TypeScript (frontend). It allows you to create, view, edit, and filter user needs for the Aykua system across different user groups, entities, and workflow phases.
+This is a general-purpose User Needs Management tool built with FastAPI (Python backend) and React TypeScript (frontend). It allows you to create, view, edit, and filter user needs across different user groups, entities, and workflow phases. The tool is domain-agnostic and can be adapted for any industry or use case.
 
 ## Project Structure
 
@@ -15,20 +15,25 @@ UserNeedVisualiser/
 │   ├── src/
 │   │   ├── App.tsx          # Main application component
 │   │   ├── components/
+│   │   │   ├── Header.tsx           # Header with demo mode toggle
+│   │   │   ├── FirstTimeSetup.tsx   # First-time user group setup modal
 │   │   │   ├── Filters.tsx          # Filter controls in sidebar
 │   │   │   ├── Statistics.tsx       # Statistics panel with toggle
 │   │   │   ├── UserNeedForm.tsx     # Form for creating/editing needs
 │   │   │   ├── UserNeedFormModal.tsx # Modal wrapper for form
 │   │   │   ├── Modal.tsx            # Reusable modal component
-│   │   │   ├── ViewToggle.tsx       # Cards/Table/Graph view toggle
-│   │   │   ├── CardsView.tsx        # Cards view of user needs
-│   │   │   ├── TableView.tsx        # Table view of user needs
+│   │   │   ├── UserNeedsList.tsx    # Cards/Table view renderer
 │   │   │   └── NetworkGraph.tsx     # Graph visualization
+│   │   ├── hooks/
+│   │   │   └── useDemoMode.ts       # Demo mode state management
 │   │   ├── types.ts         # TypeScript type definitions
 │   │   └── *.css            # Component-specific styles
 │   ├── package.json         # Frontend dependencies
 │   └── vite.config.ts       # Vite build configuration
-└── data.json                # Database file (JSON)
+├── data.json                # User's actual data (git-ignored, auto-created)
+├── data.demomode.json       # Demo sandbox data (git-ignored, auto-created)
+├── data.example.json        # Homezy demo template (version controlled)
+└── data.template.json       # Empty structure template (version controlled)
 ```
 
 ## Tech Stack
@@ -44,23 +49,36 @@ UserNeedVisualiser/
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Build tool and dev server
 - **Axios** - HTTP client for API calls
+- **D3.js** - Network graph visualization
 
 ## Key Features
 
-### 1. User Needs Management
+### 1. First-Time Setup
+- Automatic empty `data.json` creation
+- Guided modal for creating first user group
+- Option to try Demo Mode first
+
+### 2. Demo Mode
+- Sandbox environment with Homezy property letting example data
+- Separate `data.demomode.json` file (doesn't affect real data)
+- Toggle via menu in header
+- Persisted in localStorage
+
+### 3. User Needs Management
 - Create, read, update, delete (CRUD) operations
 - Auto-generated IDs based on super group prefixes (AYK, CLI, PAT)
 - Manual ID override option
 - Full-screen modal form with escape key support
 
-### 2. Filtering System
+### 4. Filtering System
 - Filter by User Group
-- Filter by Super Group (Aykua, Clinic, Medical Services User)
+- Filter by Super Group (aykua, clinic, medical_services_user)
 - Filter by Entity
 - Filter by Workflow Phase
+- Filter by Refined status
 - Filters are cleared when clicking statistics bars to prevent invalid states
 
-### 3. Statistics Panel
+### 5. Statistics Panel
 - Toggle between User Group and Super Group views
 - Clickable bars to apply filters
 - Collapsible "Show More Details" section with:
@@ -68,36 +86,47 @@ UserNeedVisualiser/
   - Top 10 Entities statistics
 - Visual bar charts with percentage widths
 
-### 4. Multiple Views
-- **Cards View** - Expandable cards with full details
+### 6. Multiple Views
+- **Cards View** - Expandable cards with full details (normal/large sizes)
 - **Table View** - Compact tabular format with expandable rows
-- **Graph View** - Network visualization (via NetworkGraph component)
+- **Graph View** - D3 network visualization showing relationships
 
-### 5. Super Group System
-Each user group belongs to a super group:
-- **aykua** - Aykua staff, security officers, developers, operators, finance
+### 7. Super Group System
+Each user group belongs to a super group for ID prefix management:
+- **aykua** (Internal Staff)
   - ID Prefix: `AYK`
-- **clinic** - Clinic staff, clinic security officers
+  - Example groups: Admins, Developers, Security Officers
+- **clinic** (External Partners)
   - ID Prefix: `CLI`
-- **medical_services_user** - Patients
+  - Example groups: Landlords, Property Managers, Maintenance Staff
+- **medical_services_user** (End Users)
   - ID Prefix: `PAT`
+  - Example groups: Prospective Renters, Customers, Patients
 
 ## API Endpoints
 
+All endpoints support `demo_mode` query parameter (boolean) to switch between `data.json` and `data.demomode.json`.
+
+### Setup
+- `GET /api/check-setup` - Check if initial setup is required
+
+### User Groups
+- `GET /api/user-groups?demo_mode=false` - Get all user groups
+- `POST /api/user-groups?demo_mode=false` - Create a new user group
+
 ### User Needs
-- `GET /api/user-needs` - Get all user needs with optional filters
-- `POST /api/user-needs` - Create a new user need
-- `PUT /api/user-needs/{need_id}` - Update an existing user need
-- `DELETE /api/user-needs/{need_id}` - Delete a user need
+- `GET /api/user-needs?demo_mode=false` - Get all user needs with optional filters
+- `POST /api/user-needs?demo_mode=false` - Create a new user need
+- `PUT /api/user-needs/{need_id}?demo_mode=false` - Update an existing user need
+- `DELETE /api/user-needs/{need_id}?demo_mode=false` - Delete a user need
 
 ### Metadata
-- `GET /api/user-groups` - Get all user groups
-- `GET /api/entities` - Get all entities
-- `GET /api/workflow-phases` - Get all workflow phases
-- `GET /api/statistics` - Get statistics (counts by group, entity, phase)
+- `GET /api/entities?demo_mode=false` - Get all entities
+- `GET /api/workflow-phases?demo_mode=false` - Get all workflow phases
+- `GET /api/statistics?demo_mode=false` - Get statistics (counts by group, entity, phase)
 
 ### Utilities
-- `GET /api/next-id/{user_group_id}` - Get next available ID for a user group
+- `GET /api/next-id/{user_group_id}?demo_mode=false` - Get next available ID for a user group
 
 ## Data Model
 
@@ -109,15 +138,23 @@ Each user group belongs to a super group:
   title: string
   description: string
   entities: string[]           // Array of entity IDs
-  workflowPhases: string[]     // Array of workflow phase IDs
+  workflowPhase: string        // Single workflow phase ID
+  refined?: boolean            // Optional refinement status
+  sla?: string                 // Optional SLA
+  triggersStateChange?: boolean
+  fromState?: string
+  toState?: string
+  optional?: boolean
+  futureFeature?: boolean
+  constraints?: string[]
 }
 ```
 
 ### UserGroup
 ```typescript
 {
-  id: string                   // e.g., "clinic_staff"
-  name: string                 // e.g., "Clinic Staff"
+  id: string                   // e.g., "landlord"
+  name: string                 // e.g., "Landlord"
   superGroup: string           // "aykua" | "clinic" | "medical_services_user"
 }
 ```
@@ -125,22 +162,39 @@ Each user group belongs to a super group:
 ### Entity
 ```typescript
 {
-  id: string                   // e.g., "patient_record"
-  name: string                 // e.g., "Patient Record"
+  id: string                   // e.g., "property_listing"
+  name: string                 // e.g., "Property Listing"
 }
 ```
 
 ### WorkflowPhase
 ```typescript
 {
-  id: string                   // e.g., "registration"
-  name: string                 // e.g., "Registration"
+  id: string                   // e.g., "viewing"
+  name: string                 // e.g., "Viewing"
+  order: number                // e.g., 3
 }
 ```
 
 ## Development Setup
 
-### Backend
+### Docker (Recommended)
+```bash
+# Start both backend and frontend
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+Access the application at [http://localhost:3000](http://localhost:3000)
+
+### Manual Setup
+
+#### Backend
 ```bash
 cd backend
 uv venv
@@ -149,87 +203,120 @@ uv pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-### Frontend
+#### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev  # Runs on port 5173
 ```
 
-The frontend proxies API requests to `http://localhost:8000` via Vite configuration.
+The frontend proxies API requests to `http://localhost:8000` via Vite configuration (or `http://backend:8000` in Docker).
 
-## Working with Data (data.json)
+## Working with Data Files
 
-The `data.json` file is the database for this application. It contains all user needs, user groups, entities, and workflow phases.
+The application uses multiple JSON files:
+
+### data.json (Your Actual Data)
+- Git-ignored for privacy
+- Auto-created with empty structure on first run
+- Contains your real user needs and configuration
+
+### data.demomode.json (Demo Sandbox)
+- Git-ignored
+- Auto-created from `data.example.json` when demo mode is first enabled
+- Completely separate from `data.json` - safe to experiment
+
+### data.example.json (Homezy Demo Template)
+- Version controlled
+- Contains complete Homezy property letting example
+- Used as the basis for `data.demomode.json`
+
+### data.template.json (Empty Template)
+- Version controlled
+- Shows the required JSON structure
+- Used for creating new `data.json` files
 
 ### Structure
 ```json
 {
-  "userNeeds": [...],
   "userGroups": [...],
   "entities": [...],
-  "workflowPhases": [...]
+  "workflowPhases": [...],
+  "userNeeds": [...]
 }
 ```
 
 ---
 
-# Working with Claude Code to Modify data.json
+# Working with Claude Code to Modify Data Files
 
-Claude Code can help you directly modify the `data.json` file through natural language prompts. Here are common operations:
+Claude Code can help you directly modify data files through natural language prompts. Here are common operations:
 
-## Adding User Needs
+## Homezy Demo Mode Examples
 
-**Example Prompt:**
-```
-Add a new user need for clinic_staff with:
-- ID: CLI-010
-- Title: "View patient appointment history"
-- Description: "Clinic staff need to view all past and upcoming appointments for a patient"
-- Entities: patient_record, appointment
-- Workflow Phases: consultation, follow_up
-```
+The demo mode includes a fictional property letting app called "Homezy" with these user groups:
+- **Prospective Renter** (PAT prefix) - End users looking for properties
+- **Landlord** (CLI prefix) - Property owners
+- **Property Manager** (CLI prefix) - Managing multiple properties
+- **Homezy Admin** (AYK prefix) - Platform administrators
+- **Homezy Security Officer** (AYK prefix) - Security and compliance
+- **Maintenance Staff** (CLI prefix) - Property maintenance
 
-Claude will:
-1. Read the current `data.json`
-2. Find the next available ID or use your specified ID
-3. Add the new user need to the `userNeeds` array
-4. Save the file
-
-## Bulk Adding User Needs
+## Adding User Needs (Demo Mode Examples)
 
 **Example Prompt:**
 ```
-Add the following user needs for aykua_developer:
-1. "Implement API rate limiting" - entities: api, security - phases: development, testing
-2. "Add audit logging" - entities: audit_log, security - phases: development, testing
-3. "Create backup system" - entities: database, backup - phases: deployment, maintenance
+Add a new user need for landlord with:
+- Title: "Track rental income analytics"
+- Description: "Landlords need to view detailed analytics on rental income, occupancy rates, and financial projections"
+- Entities: payment, property_listing
+- Workflow Phase: tenancy_management
+```
+
+**Example Prompt (Bulk):**
+```
+Add the following user needs for prospective_renter in demo mode:
+1. "Save favorite properties" - entities: property_listing - phase: property_search
+2. "Compare multiple properties" - entities: property_listing - phase: property_search
+3. "Set up viewing reminders" - entities: viewing_request - phase: viewing
+```
+
+## Adding User Needs (General Examples)
+
+**Example Prompt:**
+```
+Add a new user need for admin_user with:
+- ID: AYK-010
+- Title: "Export user activity reports"
+- Description: "Admins need to export comprehensive reports of user activity for compliance"
+- Entities: audit_log, user_profile
+- Workflow Phases: reporting, compliance
 ```
 
 ## Modifying Existing User Needs
 
 **Example Prompt:**
 ```
-Update user need CLI-009:
-- Change the title to "Access real-time patient vitals"
-- Add "monitoring" to the workflow phases
+Update user need CLI-005:
+- Change the title to "Automated deposit return processing"
+- Add "payment_gateway" to the entities list
 ```
 
-**Example Prompt:**
+**Example Prompt (Bulk):**
 ```
-For all user needs with entity "patient_record", add the workflow phase "data_protection"
+For all user needs with entity "payment", add workflow phase "financial_audit"
 ```
 
 ## Deleting User Needs
 
 **Example Prompt:**
 ```
-Delete user need AYK-005
+Delete user need PAT-003
 ```
 
-**Example Prompt:**
+**Example Prompt (Conditional):**
 ```
-Remove all user needs for the entity "legacy_system"
+Remove all user needs for the entity "legacy_payment_system"
 ```
 
 ## Adding Entities
@@ -237,8 +324,16 @@ Remove all user needs for the entity "legacy_system"
 **Example Prompt:**
 ```
 Add a new entity:
-- ID: medication_prescription
-- Name: Medication Prescription
+- ID: property_insurance
+- Name: Property Insurance
+```
+
+**Example Prompt (Bulk):**
+```
+Add these entities for Homezy demo:
+- tenant_review / Tenant Review
+- property_photos / Property Photos
+- lease_template / Lease Template
 ```
 
 ## Adding Workflow Phases
@@ -246,8 +341,9 @@ Add a new entity:
 **Example Prompt:**
 ```
 Add a new workflow phase:
-- ID: post_discharge
-- Name: Post-Discharge
+- ID: lease_renewal
+- Name: Lease Renewal
+- Order: 11
 ```
 
 ## Adding User Groups
@@ -255,8 +351,8 @@ Add a new workflow phase:
 **Example Prompt:**
 ```
 Add a new user group:
-- ID: pharmacy_staff
-- Name: Pharmacy Staff
+- ID: property_inspector
+- Name: Property Inspector
 - Super Group: clinic
 ```
 
@@ -264,34 +360,35 @@ Add a new user group:
 
 **Example Prompt:**
 ```
-Add these entities:
-- lab_result / Lab Result
-- imaging_scan / Imaging Scan
-- vital_signs / Vital Signs
+Add these workflow phases in order:
+1. lead_qualification (Lead Qualification) - order: 1
+2. property_tour (Property Tour) - order: 2
+3. application_review (Application Review) - order: 3
+4. lease_signing (Lease Signing) - order: 4
 ```
 
 ## Searching and Filtering
 
 **Example Prompt:**
 ```
-Show me all user needs for clinic_staff that include the entity "appointment"
+Show me all user needs for property_manager that include the entity "maintenance_request"
 ```
 
 **Example Prompt:**
 ```
-List all user needs in the "registration" workflow phase
+List all user needs in the "viewing" workflow phase
 ```
 
 **Example Prompt:**
 ```
-Find user needs that don't have any workflow phases assigned
+Find user needs that don't have any entities assigned
 ```
 
 ## Data Validation
 
 **Example Prompt:**
 ```
-Check if there are any user needs with missing or invalid entities
+Check if there are any user needs with invalid entity references (entities that don't exist in the entities array)
 ```
 
 **Example Prompt:**
@@ -299,16 +396,28 @@ Check if there are any user needs with missing or invalid entities
 Verify all user group IDs in userNeeds exist in the userGroups array
 ```
 
+## Working with Demo Mode
+
+**Example Prompt:**
+```
+Show me the difference in user needs count between my real data and demo data
+```
+
+**Example Prompt:**
+```
+Copy the "landlord" user group from demo mode to my actual data
+```
+
 ## ID Management
 
 **Example Prompt:**
 ```
-What's the next available ID for clinic_staff?
+What's the next available ID for homezy_admin user group in demo mode?
 ```
 
 **Example Prompt:**
 ```
-Renumber all clinic user needs to start from CLI-001 in sequential order
+Renumber all landlord user needs to start from CLI-020 in sequential order
 ```
 
 ## Tips for Working with Claude Code
@@ -319,17 +428,20 @@ Renumber all clinic user needs to start from CLI-001 in sequential order
 4. **Backup first**: Ask Claude to show you the current data before making large changes
 5. **Incremental changes**: Make changes in small batches and verify before proceeding
 6. **Ask for confirmation**: Request a summary of changes before applying them
+7. **Demo mode first**: Try changes in demo mode before applying to real data
 
 ## Common Patterns
 
-### Creating a Complete User Journey
+### Creating a Complete User Journey (Homezy Example)
 ```
-Create user needs for the patient registration journey:
-1. Initial form submission
-2. Identity verification
-3. Medical history collection
-4. Insurance validation
-5. Appointment scheduling
+Create user needs for the tenant move-in journey:
+1. Complete final viewing
+2. Submit rental application
+3. Provide references
+4. Sign lease agreement
+5. Pay first month's rent and deposit
+6. Schedule move-in inspection
+7. Receive keys and access codes
 ```
 
 ### Reorganizing Data
@@ -359,6 +471,12 @@ The `Modal.tsx` component is reusable for any full-screen modal:
 </Modal>
 ```
 
+### First-Time Setup Pattern
+See `FirstTimeSetup.tsx` for the welcome modal that appears when `data.json` is empty.
+
+### Demo Mode Pattern
+See `useDemoMode.ts` hook for localStorage-persisted boolean state.
+
 ### Toggle Button Pattern
 See `Statistics.tsx` for the toggle button implementation (User Group vs Super Group).
 
@@ -376,12 +494,15 @@ See `UserNeedForm.tsx` for auto-generated vs manual ID fields with checkbox togg
 
 - Components: PascalCase (e.g., `UserNeedForm.tsx`)
 - Styles: Match component name (e.g., `UserNeedForm.css`)
+- Hooks: camelCase with "use" prefix (e.g., `useDemoMode.ts`)
 - Types: Singular when possible (e.g., `UserNeed` not `UserNeeds`)
 
 ## State Management
 
 - Local state with `useState` for UI state
+- Custom hooks for cross-component state (e.g., `useDemoMode`)
 - Props drilling for shared state (filters, user needs, etc.)
+- localStorage for persisting preferences (demo mode)
 - No external state management library currently used
 
 ## Best Practices
@@ -392,14 +513,16 @@ See `UserNeedForm.tsx` for auto-generated vs manual ID fields with checkbox togg
 4. **ID prefixes**: Follow super group prefix system (AYK, CLI, PAT)
 5. **Accessibility**: Include ARIA labels and keyboard navigation
 6. **Responsive**: Test on mobile viewports
+7. **Demo mode first**: Test changes in demo mode before applying to real data
 
 ## Known Issues / Limitations
 
-- Data is stored in JSON file (no database)
+- Data is stored in JSON files (no database)
 - No authentication/authorization
 - No concurrent edit protection
 - Limited to single-user scenarios
 - No undo/redo functionality
+- Demo mode and real data have separate statistics (don't merge)
 
 ## Future Enhancements
 
@@ -411,3 +534,4 @@ See `UserNeedForm.tsx` for auto-generated vs manual ID fields with checkbox togg
 - Import from spreadsheet
 - Advanced graph visualizations
 - User need dependencies/relationships
+- Customizable super group names and prefixes

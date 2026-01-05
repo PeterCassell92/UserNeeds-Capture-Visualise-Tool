@@ -5,6 +5,9 @@ import UserNeedFormModal from './components/UserNeedFormModal'
 import Filters from './components/Filters'
 import Statistics from './components/Statistics'
 import NetworkGraph from './components/NetworkGraph'
+import { Header } from './components/Header'
+import { FirstTimeSetup } from './components/FirstTimeSetup'
+import { useDemoMode } from './hooks/useDemoMode'
 import type { UserNeed, UserGroup, Entity, WorkflowPhase, Statistics as StatsType, Filters as FiltersType, UserNeedCreate, UserNeedUpdate } from './types'
 import './App.css'
 
@@ -14,6 +17,7 @@ type ViewType = 'table' | 'cards' | 'graph'
 type CardSize = 'normal' | 'large'
 
 function App() {
+  const [demoMode, setDemoMode] = useDemoMode()
   const [userNeeds, setUserNeeds] = useState<UserNeed[]>([])
   const [userGroups, setUserGroups] = useState<UserGroup[]>([])
   const [entities, setEntities] = useState<Entity[]>([])
@@ -23,6 +27,7 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [editingNeed, setEditingNeed] = useState<UserNeed | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [showFirstTimeSetup, setShowFirstTimeSetup] = useState(false)
   const [view, setView] = useState<ViewType>('cards')
   const [cardSize, setCardSize] = useState<CardSize>('normal')
 
@@ -35,26 +40,53 @@ function App() {
     refined: 'all'
   })
 
-  // Load initial data
+  // Load initial data and check setup
   useEffect(() => {
-    loadData()
+    checkSetup()
   }, [])
+
+  // Reload data when demo mode changes
+  useEffect(() => {
+    if (!loading) {
+      loadData()
+    }
+  }, [demoMode])
 
   // Load data when filters change
   useEffect(() => {
-    loadUserNeeds()
+    if (!loading) {
+      loadUserNeeds()
+    }
   }, [filters])
 
   // Note: Escape key handling is now done in the Modal component
 
+  const checkSetup = async () => {
+    try {
+      const response = await axios.get<{ hasData: boolean; needsSetup: boolean }>(`${API_BASE}/check-setup`)
+
+      // Only trigger first-time setup if not in demo mode and needs setup
+      if (!demoMode && response.data.needsSetup) {
+        setShowFirstTimeSetup(true)
+        setLoading(false)
+      } else {
+        await loadData()
+      }
+    } catch (err) {
+      // If check fails, continue with normal loading
+      await loadData()
+    }
+  }
+
   const loadData = async () => {
     try {
       setLoading(true)
+      const params = { demo_mode: demoMode }
       const [groupsRes, entitiesRes, phasesRes, statsRes] = await Promise.all([
-        axios.get<UserGroup[]>(`${API_BASE}/user-groups`),
-        axios.get<Entity[]>(`${API_BASE}/entities`),
-        axios.get<WorkflowPhase[]>(`${API_BASE}/workflow-phases`),
-        axios.get<StatsType>(`${API_BASE}/statistics`)
+        axios.get<UserGroup[]>(`${API_BASE}/user-groups`, { params }),
+        axios.get<Entity[]>(`${API_BASE}/entities`, { params }),
+        axios.get<WorkflowPhase[]>(`${API_BASE}/workflow-phases`, { params }),
+        axios.get<StatsType>(`${API_BASE}/statistics`, { params })
       ])
 
       setUserGroups(groupsRes.data)
@@ -72,7 +104,7 @@ function App() {
 
   const loadUserNeeds = async () => {
     try {
-      const params: Record<string, string> = {}
+      const params: Record<string, string | boolean> = { demo_mode: demoMode }
       if (filters.userGroupId) params.userGroupId = filters.userGroupId
       if (filters.entity) params.entity = filters.entity
       if (filters.workflowPhase) params.workflowPhase = filters.workflowPhase
@@ -83,7 +115,7 @@ function App() {
       setUserNeeds(res.data)
 
       // Refresh statistics
-      const statsRes = await axios.get<StatsType>(`${API_BASE}/statistics`)
+      const statsRes = await axios.get<StatsType>(`${API_BASE}/statistics`, { params: { demo_mode: demoMode } })
       setStatistics(statsRes.data)
     } catch (err) {
       setError('Failed to load user needs: ' + (err as Error).message)
@@ -92,7 +124,7 @@ function App() {
 
   const handleCreateNeed = async (needData: UserNeedCreate) => {
     try {
-      await axios.post(`${API_BASE}/user-needs`, needData)
+      await axios.post(`${API_BASE}/user-needs`, needData, { params: { demo_mode: demoMode } })
       await loadUserNeeds()
       setShowForm(false)
       setEditingNeed(null)
@@ -103,7 +135,7 @@ function App() {
 
   const handleUpdateNeed = async (needId: string, needData: UserNeedUpdate) => {
     try {
-      await axios.put(`${API_BASE}/user-needs/${needId}`, needData)
+      await axios.put(`${API_BASE}/user-needs/${needId}`, needData, { params: { demo_mode: demoMode } })
       await loadUserNeeds()
       setEditingNeed(null)
       setShowForm(false)
@@ -116,7 +148,7 @@ function App() {
     if (!confirm('Are you sure you want to delete this user need?')) return
 
     try {
-      await axios.delete(`${API_BASE}/user-needs/${needId}`)
+      await axios.delete(`${API_BASE}/user-needs/${needId}`, { params: { demo_mode: demoMode } })
       await loadUserNeeds()
     } catch (err) {
       alert('Failed to delete user need: ' + (err as Error).message)
@@ -125,10 +157,21 @@ function App() {
 
   const handleToggleRefined = async (needId: string, refined: boolean) => {
     try {
-      await axios.put(`${API_BASE}/user-needs/${needId}`, { refined })
+      await axios.put(`${API_BASE}/user-needs/${needId}`, { refined }, { params: { demo_mode: demoMode } })
       await loadUserNeeds()
     } catch (err: any) {
       alert('Failed to update refined status: ' + (err.response?.data?.detail || err.message))
+    }
+  }
+
+  const handleCreateUserGroup = async (userGroup: UserGroup) => {
+    try {
+      await axios.post(`${API_BASE}/user-groups`, userGroup, { params: { demo_mode: demoMode } })
+      setShowFirstTimeSetup(false)
+      await loadData()
+    } catch (err: any) {
+      alert('Failed to create user group: ' + (err.response?.data?.detail || err.message))
+      throw err
     }
   }
 
@@ -156,9 +199,24 @@ function App() {
     setFilters(newFilters)
   }
 
+  const handleDemoModeToggle = (enabled: boolean) => {
+    setDemoMode(enabled)
+  }
+
+  // Render first-time setup modal
+  if (showFirstTimeSetup) {
+    return (
+      <div className="app">
+        <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
+        <FirstTimeSetup onCreateUserGroup={handleCreateUserGroup} />
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="app">
+        <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
         <div className="loading">Loading...</div>
       </div>
     )
@@ -167,6 +225,7 @@ function App() {
   if (error) {
     return (
       <div className="app">
+        <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
         <div className="error">{error}</div>
       </div>
     )
@@ -174,10 +233,7 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>User Needs Visualiser</h1>
-        <p>Manage and explore Aykua user needs</p>
-      </header>
+      <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
 
       <div className="app-container">
         <aside className="sidebar">
