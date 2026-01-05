@@ -24,11 +24,13 @@ interface CheckSetupResponse {
 
 /**
  * API Service for interacting with the User Needs Management backend.
- * Centralizes all HTTP requests and handles demo mode parameter injection.
+ * Centralizes all HTTP requests.
+ *
+ * Note: Demo mode is now managed by the backend via app_state, so we don't
+ * need to pass demo_mode query parameters. The backend maintains its own state.
  */
 export class ApiService {
   private client: AxiosInstance;
-  private demoMode: boolean = false;
 
   constructor() {
     this.client = axios.create({
@@ -40,32 +42,17 @@ export class ApiService {
   }
 
   /**
-   * Set demo mode for all subsequent requests
+   * @deprecated Demo mode is now managed by backend state. This method is kept
+   * for compatibility but does nothing.
    */
-  setDemoMode(enabled: boolean): void {
-    this.demoMode = enabled;
-  }
-
-  /**
-   * Get current demo mode state
-   */
-  getDemoMode(): boolean {
-    return this.demoMode;
-  }
-
-  /**
-   * Get demo mode params for requests
-   */
-  private getDemoParams(): { demo_mode: boolean } {
-    return { demo_mode: this.demoMode };
+  setDemoMode(_enabled: boolean): void {
+    // No-op: Backend now manages demo mode state
   }
 
   // ==================== Setup ====================
 
   async checkSetup(): Promise<CheckSetupResponse> {
-    const response = await this.client.get<CheckSetupResponse>('/check-setup', {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<CheckSetupResponse>('/check-setup');
     return response.data;
   }
 
@@ -90,9 +77,7 @@ export class ApiService {
     superGroup?: string;
     refined?: 'all' | 'refined' | 'needsRefinement';
   }): Promise<UserNeed[]> {
-    const params: Record<string, string | boolean> = {
-      ...this.getDemoParams(),
-    };
+    const params: Record<string, string> = {};
 
     if (filters) {
       if (filters.userGroupId) params.userGroupId = filters.userGroupId;
@@ -107,97 +92,73 @@ export class ApiService {
   }
 
   async getUserNeed(id: string): Promise<UserNeed> {
-    const response = await this.client.get<UserNeed>(`/user-needs/${id}`, {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<UserNeed>(`/user-needs/${id}`);
     return response.data;
   }
 
   async createUserNeed(userNeed: UserNeedCreate): Promise<UserNeed> {
-    const response = await this.client.post<UserNeed>('/user-needs', userNeed, {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.post<UserNeed>('/user-needs', userNeed);
     return response.data;
   }
 
   async updateUserNeed(id: string, data: UserNeedUpdate): Promise<UserNeed> {
-    const response = await this.client.put<UserNeed>(`/user-needs/${id}`, data, {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.put<UserNeed>(`/user-needs/${id}`, data);
     return response.data;
   }
 
   async deleteUserNeed(id: string): Promise<void> {
-    await this.client.delete(`/user-needs/${id}`, {
-      params: this.getDemoParams(),
-    });
+    await this.client.delete(`/user-needs/${id}`);
   }
 
   // ==================== User Groups ====================
 
   async getUserGroups(): Promise<UserGroup[]> {
-    const response = await this.client.get<UserGroup[]>('/user-groups', {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<UserGroup[]>('/user-groups');
     return response.data;
   }
 
   async createUserGroup(userGroup: UserGroup): Promise<UserGroup> {
-    const response = await this.client.post<UserGroup>('/user-groups', userGroup, {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.post<UserGroup>('/user-groups', userGroup);
     return response.data;
   }
 
   // ==================== User Super Groups ====================
 
   async getUserSuperGroups(): Promise<UserSuperGroup[]> {
-    const response = await this.client.get<UserSuperGroup[]>('/user-super-groups', {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<UserSuperGroup[]>('/user-super-groups');
     return response.data;
   }
 
   async createUserSuperGroup(superGroup: UserSuperGroup): Promise<UserSuperGroup> {
-    const response = await this.client.post<UserSuperGroup>('/user-super-groups', superGroup, {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.post<UserSuperGroup>('/user-super-groups', superGroup);
     return response.data;
   }
 
   // ==================== Entities ====================
 
   async getEntities(): Promise<Entity[]> {
-    const response = await this.client.get<Entity[]>('/entities', {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<Entity[]>('/entities');
     return response.data;
   }
 
   // ==================== Workflow Phases ====================
 
   async getWorkflowPhases(): Promise<WorkflowPhase[]> {
-    const response = await this.client.get<WorkflowPhase[]>('/workflow-phases', {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<WorkflowPhase[]>('/workflow-phases');
     return response.data;
   }
 
   // ==================== Statistics ====================
 
   async getStatistics(): Promise<Statistics> {
-    const response = await this.client.get<Statistics>('/statistics', {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<Statistics>('/statistics');
     return response.data;
   }
 
   // ==================== Next ID ====================
 
   async getNextId(userGroupId: string): Promise<{ nextId: string }> {
-    const response = await this.client.get<{ nextId: string }>(`/next-id/${userGroupId}`, {
-      params: this.getDemoParams(),
-    });
+    const response = await this.client.get<{ nextId: string }>(`/next-id/${userGroupId}`);
     return response.data;
   }
 }

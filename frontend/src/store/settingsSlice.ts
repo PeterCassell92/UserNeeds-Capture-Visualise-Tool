@@ -25,8 +25,6 @@ export const fetchDemoMode = createAsyncThunk(
   'settings/fetchDemoMode',
   async () => {
     const response = await apiService.fetchDemoMode();
-    // Update the apiService's internal demo mode state
-    apiService.setDemoMode(response.enabled);
     return response;
   }
 );
@@ -36,8 +34,6 @@ export const setDemoModeAsync = createAsyncThunk(
   'settings/setDemoMode',
   async (enabled: boolean) => {
     const response = await apiService.setDemoModeOnBackend(enabled);
-    // Update the apiService's internal demo mode state
-    apiService.setDemoMode(response.enabled);
     return response;
   }
 );
