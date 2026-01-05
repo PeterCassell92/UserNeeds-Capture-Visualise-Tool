@@ -76,43 +76,53 @@
   "workflowPhases": [
     {
       "id": "property_search",
-      "name": "Property Search"
+      "name": "Property Search",
+      "order": 1
     },
     {
       "id": "application",
-      "name": "Application"
+      "name": "Application",
+      "order": 2
     },
     {
       "id": "viewing",
-      "name": "Viewing"
+      "name": "Viewing",
+      "order": 3
     },
     {
       "id": "reference_check",
-      "name": "Reference Check"
+      "name": "Reference Check",
+      "order": 4
     },
     {
       "id": "contract_signing",
-      "name": "Contract Signing"
+      "name": "Contract Signing",
+      "order": 5
     },
     {
       "id": "move_in",
-      "name": "Move-in"
+      "name": "Move-in",
+      "order": 6
     },
     {
       "id": "tenancy_management",
-      "name": "Tenancy Management"
+      "name": "Tenancy Management",
+      "order": 7
     },
     {
       "id": "maintenance",
-      "name": "Maintenance"
+      "name": "Maintenance",
+      "order": 8
     },
     {
       "id": "move_out",
-      "name": "Move-out"
+      "name": "Move-out",
+      "order": 9
     },
     {
       "id": "deposit_return",
-      "name": "Deposit Return"
+      "name": "Deposit Return",
+      "order": 10
     }
   ],
   "userNeeds": [

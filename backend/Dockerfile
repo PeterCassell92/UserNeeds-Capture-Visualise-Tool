@@ -15,6 +15,7 @@ RUN uv pip install --system --no-cache -r requirements.txt
 
 # Copy application code
 COPY main.py .
+COPY app/ ./app/
 
 # Expose port 8000
 EXPOSE 8000
