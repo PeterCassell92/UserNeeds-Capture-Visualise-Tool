@@ -157,31 +157,27 @@ const userNeedsSlice = createSlice({
       })
       // Update user need
       .addCase(updateUserNeed.pending, (state) => {
-        state.loading = true;
+        // Don't set loading=true for updates to prevent scroll position loss
         state.error = null;
       })
       .addCase(updateUserNeed.fulfilled, (state, action: PayloadAction<UserNeed>) => {
-        state.loading = false;
         const index = state.userNeeds.findIndex((need) => need.id === action.payload.id);
         if (index !== -1) {
           state.userNeeds[index] = action.payload;
         }
       })
       .addCase(updateUserNeed.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to update user need';
       })
       // Delete user need
       .addCase(deleteUserNeed.pending, (state) => {
-        state.loading = true;
+        // Don't set loading=true for deletes to prevent scroll position loss
         state.error = null;
       })
       .addCase(deleteUserNeed.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading = false;
         state.userNeeds = state.userNeeds.filter((need) => need.id !== action.payload);
       })
       .addCase(deleteUserNeed.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to delete user need';
       })
       // Create user group
