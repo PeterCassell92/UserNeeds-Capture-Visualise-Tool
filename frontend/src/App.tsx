@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import UserNeedsList from './components/UserNeedsList'
 import UserNeedFormModal from './components/UserNeedFormModal'
 import Filters from './components/Filters'
@@ -8,39 +7,37 @@ import NetworkGraph from './components/NetworkGraph'
 import { Header } from './components/Header'
 import { FirstTimeSetup } from './components/FirstTimeSetup'
 import { useAppDispatch, useAppSelector } from './store/hooks'
-import { fetchDemoMode, setDemoModeAsync } from './store/settingsSlice'
-import type { UserNeed, UserGroup, Entity, WorkflowPhase, Statistics as StatsType, Filters as FiltersType, UserNeedCreate, UserNeedUpdate } from './types'
+import { fetchDemoMode } from './store/settingsSlice'
+import { setFilters } from './store/filtersSlice'
+import {
+  loadReferenceData,
+  loadUserNeeds,
+  createUserNeed,
+  updateUserNeed,
+  deleteUserNeed,
+  createUserGroup
+} from './store/userNeedsSlice'
+import { apiService } from './services/apiService'
+import type { UserNeed, UserGroup, UserNeedCreate, UserNeedUpdate } from './types'
 import './App.css'
-
-const API_BASE = '/api'
 
 type ViewType = 'table' | 'cards' | 'graph'
 type CardSize = 'normal' | 'large'
 
 function App() {
   const dispatch = useAppDispatch()
+
+  // Redux state
   const demoMode = useAppSelector((state) => state.settings.demoMode)
-  const [userNeeds, setUserNeeds] = useState<UserNeed[]>([])
-  const [userGroups, setUserGroups] = useState<UserGroup[]>([])
-  const [entities, setEntities] = useState<Entity[]>([])
-  const [workflowPhases, setWorkflowPhases] = useState<WorkflowPhase[]>([])
-  const [statistics, setStatistics] = useState<StatsType | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const filters = useAppSelector((state) => state.filters)
+  const { userNeeds, userGroups, entities, workflowPhases, statistics, loading, error } = useAppSelector((state) => state.userNeeds)
+
+  // Local UI state only
   const [editingNeed, setEditingNeed] = useState<UserNeed | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [showFirstTimeSetup, setShowFirstTimeSetup] = useState(false)
   const [view, setView] = useState<ViewType>('cards')
   const [cardSize, setCardSize] = useState<CardSize>('normal')
-
-  // Filters
-  const [filters, setFilters] = useState<FiltersType>({
-    userGroupId: '',
-    entity: '',
-    workflowPhase: '',
-    superGroup: '',
-    refined: 'all'
-  })
 
   // Fetch demo mode state from backend on initialization
   useEffect(() => {
@@ -51,94 +48,50 @@ function App() {
     initializeApp()
   }, [dispatch])
 
-  // Load data when filters change
+  // Load user needs when filters change
   useEffect(() => {
-    if (!loading) {
-      loadUserNeeds()
+    if (!loading && userGroups.length > 0) {
+      dispatch(loadUserNeeds())
     }
-  }, [filters])
+  }, [filters, dispatch])
 
   // Note: Escape key handling is now done in the Modal component
 
   const checkSetup = async () => {
     try {
-      const response = await axios.get<{ hasData: boolean; needsSetup: boolean }>(`${API_BASE}/check-setup`)
+      const response = await apiService.checkSetup()
 
       // Only trigger first-time setup if not in demo mode and needs setup
-      if (!demoMode && response.data.needsSetup) {
+      if (!demoMode && response.needsSetup) {
         setShowFirstTimeSetup(true)
-        setLoading(false)
       } else {
-        await loadData()
+        dispatch(loadReferenceData())
+        dispatch(loadUserNeeds())
       }
     } catch (err) {
       // If check fails, continue with normal loading
-      await loadData()
-    }
-  }
-
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      const [groupsRes, entitiesRes, phasesRes, statsRes] = await Promise.all([
-        axios.get<UserGroup[]>(`${API_BASE}/user-groups`),
-        axios.get<Entity[]>(`${API_BASE}/entities`),
-        axios.get<WorkflowPhase[]>(`${API_BASE}/workflow-phases`),
-        axios.get<StatsType>(`${API_BASE}/statistics`)
-      ])
-
-      setUserGroups(groupsRes.data)
-      setEntities(entitiesRes.data)
-      setWorkflowPhases(phasesRes.data)
-      setStatistics(statsRes.data)
-
-      await loadUserNeeds()
-    } catch (err) {
-      setError('Failed to load data: ' + (err as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadUserNeeds = async () => {
-    try {
-      const params: Record<string, string> = {}
-      if (filters.userGroupId) params.userGroupId = filters.userGroupId
-      if (filters.entity) params.entity = filters.entity
-      if (filters.workflowPhase) params.workflowPhase = filters.workflowPhase
-      if (filters.superGroup) params.superGroup = filters.superGroup
-      if (filters.refined !== 'all') params.refined = filters.refined
-
-      const res = await axios.get<UserNeed[]>(`${API_BASE}/user-needs`, { params })
-      setUserNeeds(res.data)
-
-      // Refresh statistics
-      const statsRes = await axios.get<StatsType>(`${API_BASE}/statistics`)
-      setStatistics(statsRes.data)
-    } catch (err) {
-      setError('Failed to load user needs: ' + (err as Error).message)
+      dispatch(loadReferenceData())
+      dispatch(loadUserNeeds())
     }
   }
 
   const handleCreateNeed = async (needData: UserNeedCreate) => {
     try {
-      await axios.post(`${API_BASE}/user-needs`, needData)
-      await loadUserNeeds()
+      await dispatch(createUserNeed(needData))
       setShowForm(false)
       setEditingNeed(null)
     } catch (err: any) {
-      alert('Failed to create user need: ' + (err.response?.data?.detail || err.message))
+      alert('Failed to create user need: ' + (err.message || 'Unknown error'))
     }
   }
 
   const handleUpdateNeed = async (needId: string, needData: UserNeedUpdate) => {
     try {
-      await axios.put(`${API_BASE}/user-needs/${needId}`, needData)
-      await loadUserNeeds()
+      await dispatch(updateUserNeed({ id: needId, data: needData }))
       setEditingNeed(null)
       setShowForm(false)
     } catch (err: any) {
-      alert('Failed to update user need: ' + (err.response?.data?.detail || err.message))
+      alert('Failed to update user need: ' + (err.message || 'Unknown error'))
     }
   }
 
@@ -146,8 +99,7 @@ function App() {
     if (!confirm('Are you sure you want to delete this user need?')) return
 
     try {
-      await axios.delete(`${API_BASE}/user-needs/${needId}`)
-      await loadUserNeeds()
+      await dispatch(deleteUserNeed(needId))
     } catch (err) {
       alert('Failed to delete user need: ' + (err as Error).message)
     }
@@ -155,20 +107,20 @@ function App() {
 
   const handleToggleRefined = async (needId: string, refined: boolean) => {
     try {
-      await axios.put(`${API_BASE}/user-needs/${needId}`, { refined })
-      await loadUserNeeds()
+      await dispatch(updateUserNeed({ id: needId, data: { refined } }))
     } catch (err: any) {
-      alert('Failed to update refined status: ' + (err.response?.data?.detail || err.message))
+      alert('Failed to update refined status: ' + (err.message || 'Unknown error'))
     }
   }
 
   const handleCreateUserGroup = async (userGroup: UserGroup) => {
     try {
-      await axios.post(`${API_BASE}/user-groups`, userGroup, { params: { demo_mode: demoMode } })
+      await dispatch(createUserGroup(userGroup))
       setShowFirstTimeSetup(false)
-      await loadData()
+      await dispatch(loadReferenceData())
+      await dispatch(loadUserNeeds())
     } catch (err: any) {
-      alert('Failed to create user group: ' + (err.response?.data?.detail || err.message))
+      alert('Failed to create user group: ' + (err.message || 'Unknown error'))
       throw err
     }
   }
@@ -193,22 +145,15 @@ function App() {
     }
   }
 
-  const handleFilterChange = (newFilters: FiltersType) => {
-    setFilters(newFilters)
-  }
-
-  const handleDemoModeToggle = async (enabled: boolean) => {
-    // Update demo mode on backend
-    await dispatch(setDemoModeAsync(enabled))
-    // Reload all data with new demo mode setting
-    await loadData()
+  const handleFilterChange = (newFilters: typeof filters) => {
+    dispatch(setFilters(newFilters))
   }
 
   // Render first-time setup modal
   if (showFirstTimeSetup) {
     return (
       <div className="app">
-        <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
+        <Header />
         <FirstTimeSetup onCreateUserGroup={handleCreateUserGroup} />
       </div>
     )
@@ -217,7 +162,7 @@ function App() {
   if (loading) {
     return (
       <div className="app">
-        <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
+        <Header />
         <div className="loading">Loading...</div>
       </div>
     )
@@ -226,7 +171,7 @@ function App() {
   if (error) {
     return (
       <div className="app">
-        <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
+        <Header />
         <div className="error">{error}</div>
       </div>
     )
@@ -234,7 +179,7 @@ function App() {
 
   return (
     <div className="app">
-      <Header demoMode={demoMode} onDemoModeToggle={handleDemoModeToggle} />
+      <Header />
 
       <div className="app-container">
         <aside className="sidebar">
@@ -295,40 +240,40 @@ function App() {
               statistics={statistics}
               userGroups={userGroups}
               onUserGroupClick={(userGroupId) => {
-                setFilters({
+                dispatch(setFilters({
                   userGroupId,
                   entity: '',
                   workflowPhase: '',
                   superGroup: '',
                   refined: 'all'
-                })
+                }))
               }}
               onSuperGroupClick={(superGroup) => {
-                setFilters({
+                dispatch(setFilters({
                   userGroupId: '',
                   entity: '',
                   workflowPhase: '',
                   superGroup,
                   refined: 'all'
-                })
+                }))
               }}
               onEntityClick={(entityId) => {
-                setFilters({
+                dispatch(setFilters({
                   userGroupId: '',
                   entity: entityId,
                   workflowPhase: '',
                   superGroup: '',
                   refined: 'all'
-                })
+                }))
               }}
               onWorkflowPhaseClick={(workflowPhaseId) => {
-                setFilters({
+                dispatch(setFilters({
                   userGroupId: '',
                   entity: '',
                   workflowPhase: workflowPhaseId,
                   superGroup: '',
                   refined: 'all'
-                })
+                }))
               }}
             />
           )}

@@ -95,3 +95,5 @@ lerna-debug.log*
 # Application data files (user-specific, not version controlled)
 data.json
 data.demomode.json
+
+private_data_folder/**

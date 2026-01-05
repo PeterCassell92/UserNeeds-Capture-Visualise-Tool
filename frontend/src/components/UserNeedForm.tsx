@@ -198,7 +198,7 @@ function UserNeedForm({ need, userGroups, entities, workflowPhases, onSubmit, on
               required
             >
               <option value="">Select a workflow phase</option>
-              {workflowPhases
+              {[...workflowPhases]
                 .sort((a, b) => a.order - b.order)
                 .map((phase) => (
                   <option key={phase.id} value={phase.id}>

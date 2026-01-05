@@ -1,16 +1,21 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { apiService } from '../services/apiService';
 
-const API_BASE = '/api';
+interface DemoModeResponse {
+  enabled: boolean;
+  locked: boolean;
+}
 
 interface SettingsState {
   demoMode: boolean;
+  demoModeLocked: boolean;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: SettingsState = {
   demoMode: false,
+  demoModeLocked: false,
   loading: false,
   error: null,
 };
@@ -19,8 +24,10 @@ const initialState: SettingsState = {
 export const fetchDemoMode = createAsyncThunk(
   'settings/fetchDemoMode',
   async () => {
-    const response = await axios.get<{ enabled: boolean }>(`${API_BASE}/demo-mode`);
-    return response.data.enabled;
+    const response = await apiService.fetchDemoMode();
+    // Update the apiService's internal demo mode state
+    apiService.setDemoMode(response.enabled);
+    return response;
   }
 );
 
@@ -28,11 +35,10 @@ export const fetchDemoMode = createAsyncThunk(
 export const setDemoModeAsync = createAsyncThunk(
   'settings/setDemoMode',
   async (enabled: boolean) => {
-    const response = await axios.post<{ enabled: boolean }>(
-      `${API_BASE}/demo-mode`,
-      { enabled }
-    );
-    return response.data.enabled;
+    const response = await apiService.setDemoModeOnBackend(enabled);
+    // Update the apiService's internal demo mode state
+    apiService.setDemoMode(response.enabled);
+    return response;
   }
 );
 
@@ -47,9 +53,10 @@ const settingsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchDemoMode.fulfilled, (state, action: PayloadAction<boolean>) => {
+      .addCase(fetchDemoMode.fulfilled, (state, action: PayloadAction<DemoModeResponse>) => {
         state.loading = false;
-        state.demoMode = action.payload;
+        state.demoMode = action.payload.enabled;
+        state.demoModeLocked = action.payload.locked;
       })
       .addCase(fetchDemoMode.rejected, (state, action) => {
         state.loading = false;
@@ -60,9 +67,10 @@ const settingsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(setDemoModeAsync.fulfilled, (state, action: PayloadAction<boolean>) => {
+      .addCase(setDemoModeAsync.fulfilled, (state, action: PayloadAction<DemoModeResponse>) => {
         state.loading = false;
-        state.demoMode = action.payload;
+        state.demoMode = action.payload.enabled;
+        state.demoModeLocked = action.payload.locked;
       })
       .addCase(setDemoModeAsync.rejected, (state, action) => {
         state.loading = false;

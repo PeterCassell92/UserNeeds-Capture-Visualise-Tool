@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setDemoModeAsync } from '../store/settingsSlice';
+import { loadReferenceData, loadUserNeeds } from '../store/userNeedsSlice';
 import './Header.css';
 
-interface HeaderProps {
-  demoMode: boolean;
-  onDemoModeToggle: (enabled: boolean) => void;
-}
+export function Header() {
+  const dispatch = useAppDispatch();
+  const demoMode = useAppSelector((state) => state.settings.demoMode);
+  const demoModeLocked = useAppSelector((state) => state.settings.demoModeLocked);
 
-export function Header({ demoMode, onDemoModeToggle }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -24,8 +26,17 @@ export function Header({ demoMode, onDemoModeToggle }: HeaderProps) {
     }
   }, [menuOpen]);
 
-  const handleDemoToggle = () => {
-    onDemoModeToggle(!demoMode);
+  const handleDemoToggle = async () => {
+    if (demoModeLocked) {
+      // Don't allow toggle if locked
+      return;
+    }
+
+    // Update demo mode on backend
+    await dispatch(setDemoModeAsync(!demoMode));
+    // Reload all data with new demo mode setting
+    await dispatch(loadReferenceData());
+    await dispatch(loadUserNeeds());
     setMenuOpen(false);
   };
 
@@ -36,8 +47,11 @@ export function Header({ demoMode, onDemoModeToggle }: HeaderProps) {
 
         <div className="header-right">
           {demoMode && (
-            <span className="demo-badge" title="You are currently in demo mode">
-              Demo Mode
+            <span
+              className="demo-badge"
+              title={demoModeLocked ? "Demo mode is locked" : "You are currently in demo mode"}
+            >
+              Demo Mode{demoModeLocked && ' 🔒'}
             </span>
           )}
 
@@ -58,11 +72,13 @@ export function Header({ demoMode, onDemoModeToggle }: HeaderProps) {
             {menuOpen && (
               <div className="dropdown-menu">
                 <button
-                  className="menu-item"
+                  className={`menu-item ${demoModeLocked ? 'disabled' : ''}`}
                   onClick={handleDemoToggle}
+                  disabled={demoModeLocked}
+                  title={demoModeLocked ? "Demo mode is locked and cannot be changed" : "Toggle demo mode"}
                 >
                   <span className="menu-item-label">Demo Mode</span>
-                  <span className={`toggle-switch ${demoMode ? 'active' : ''}`}>
+                  <span className={`toggle-switch ${demoMode ? 'active' : ''} ${demoModeLocked ? 'locked' : ''}`}>
                     <span className="toggle-slider"></span>
                   </span>
                 </button>

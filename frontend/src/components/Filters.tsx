@@ -112,7 +112,7 @@ function Filters({ filters, userGroups, entities, workflowPhases, onFilterChange
           onChange={(e) => handleChange('workflowPhase', e.target.value)}
         >
           <option value="">All</option>
-          {workflowPhases
+          {[...workflowPhases]
             .sort((a, b) => a.order - b.order)
             .map((phase) => (
               <option key={phase.id} value={phase.id}>

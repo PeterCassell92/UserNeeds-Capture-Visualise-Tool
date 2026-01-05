@@ -19,6 +19,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DEMO_STORAGE_DIR=/app/demo-storage
+      - DEMO_MODE_ONLY=${DEMO_MODE_ONLY:-0}
     networks:
       - user-needs-network
     restart: unless-stopped
