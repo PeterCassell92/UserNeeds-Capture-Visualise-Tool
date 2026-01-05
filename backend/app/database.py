@@ -4,7 +4,7 @@ import json
 import shutil
 from pathlib import Path
 from .models import DataStore
-from .config import DATA_FILE, DEMO_DATA_FILE, EXAMPLE_DATA_FILE
+from .config import DATA_FILE, DEMO_DATA_FILE, EXAMPLE_DATA_FILE, TEMPLATE_DATA_FILE
 
 
 def get_data_file_path(demo_mode: bool = False) -> Path:
@@ -31,17 +31,17 @@ def initialize_data_file(file_path: Path):
 
     Args:
         file_path: Path to the data file to initialize
+
+    Raises:
+        FileNotFoundError: If template file doesn't exist
     """
     if not file_path.exists():
-        # Create empty structure
-        empty_data = {
-            "userGroups": [],
-            "entities": [],
-            "workflowPhases": [],
-            "userNeeds": []
-        }
-        with open(file_path, 'w') as f:
-            json.dump(empty_data, f, indent=2)
+        if not TEMPLATE_DATA_FILE.exists():
+            raise FileNotFoundError(
+                f"Template data file not found: {TEMPLATE_DATA_FILE}. "
+                "Cannot initialize data file without template."
+            )
+        shutil.copy(TEMPLATE_DATA_FILE, file_path)
 
 
 def load_data(demo_mode: bool = False) -> DataStore:
