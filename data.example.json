@@ -1,34 +1,51 @@
 {
+  "userSuperGroups": [
+    {
+      "id": "tenant",
+      "name": "Tenant",
+      "prefix": "TEN"
+    },
+    {
+      "id": "property_owner",
+      "name": "Property Owner",
+      "prefix": "OWN"
+    },
+    {
+      "id": "homezy_staff",
+      "name": "Homezy Staff",
+      "prefix": "HMZ"
+    }
+  ],
   "userGroups": [
     {
       "id": "prospective_renter",
       "name": "Prospective Renter",
-      "superGroup": "medical_services_user"
+      "superGroup": "tenant"
     },
     {
       "id": "landlord",
       "name": "Landlord",
-      "superGroup": "clinic"
+      "superGroup": "property_owner"
     },
     {
       "id": "property_manager",
       "name": "Property Manager",
-      "superGroup": "clinic"
+      "superGroup": "property_owner"
     },
     {
       "id": "homezy_admin",
       "name": "Homezy Admin",
-      "superGroup": "aykua"
+      "superGroup": "homezy_staff"
     },
     {
       "id": "homezy_security_officer",
       "name": "Homezy Security Officer",
-      "superGroup": "aykua"
+      "superGroup": "homezy_staff"
     },
     {
       "id": "maintenance_staff",
       "name": "Maintenance Staff",
-      "superGroup": "clinic"
+      "superGroup": "property_owner"
     }
   ],
   "entities": [

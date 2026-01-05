@@ -17,13 +17,6 @@ DEMO_DATA_FILE = DEMO_STORAGE_DIR / "data.demomode.json"
 EXAMPLE_DATA_FILE = BASE_DIR / "data.example.json"
 TEMPLATE_DATA_FILE = BASE_DIR / "data.template.json"
 
-# Super group ID prefix mapping
-SUPER_GROUP_PREFIXES = {
-    "aykua": "AYK",
-    "clinic": "CLI",
-    "medical_services_user": "PAT"
-}
-
 # CORS configuration
 CORS_ORIGINS = [
     "http://localhost:5173",  # Vite dev server

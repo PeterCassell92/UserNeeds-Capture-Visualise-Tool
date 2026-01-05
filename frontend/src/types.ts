@@ -1,3 +1,9 @@
+export interface UserSuperGroup {
+  id: string
+  name: string
+  prefix: string
+}
+
 export interface UserGroup {
   id: string
   name: string

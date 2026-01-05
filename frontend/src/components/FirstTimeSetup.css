@@ -78,3 +78,51 @@
 .setup-tip strong {
   color: #075985;
 }
+
+.super-group-creator {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.super-group-name-input {
+  flex: 2;
+  min-width: 0;
+}
+
+.super-group-prefix-input {
+  flex: 1;
+  min-width: 0;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn-add-super-group {
+  flex-shrink: 0;
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-add-super-group:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.btn-add-super-group:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.loading {
+  padding: 0.75rem;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}

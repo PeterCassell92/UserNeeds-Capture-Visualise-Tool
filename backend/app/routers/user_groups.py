@@ -5,7 +5,6 @@ from typing import List
 
 from ..models import UserGroup
 from ..database import load_data, save_data
-from ..config import SUPER_GROUP_PREFIXES
 from ..state import app_state
 
 router = APIRouter(prefix="/api/user-groups", tags=["user-groups"])
@@ -66,12 +65,16 @@ def get_next_id(user_group_id: str):
     if not user_group:
         raise HTTPException(status_code=404, detail="User group not found")
 
-    # Get the super group prefix
-    super_group = user_group.superGroup
-    if not super_group or super_group not in SUPER_GROUP_PREFIXES:
-        raise HTTPException(status_code=400, detail="Invalid super group")
+    # Get the super group prefix from data
+    super_group_id = user_group.superGroup
+    if not super_group_id:
+        raise HTTPException(status_code=400, detail="User group has no super group assigned")
 
-    prefix = SUPER_GROUP_PREFIXES[super_group]
+    super_group = next((sg for sg in data.userSuperGroups if sg.id == super_group_id), None)
+    if not super_group:
+        raise HTTPException(status_code=400, detail="Super group not found")
+
+    prefix = super_group.prefix
 
     # Find all IDs with this prefix
     matching_ids = []

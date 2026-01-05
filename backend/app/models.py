@@ -4,6 +4,13 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
+class UserSuperGroup(BaseModel):
+    """User super group model."""
+    id: str
+    name: str
+    prefix: str
+
+
 class UserGroup(BaseModel):
     """User group model."""
     id: str
@@ -81,6 +88,7 @@ class UserNeedUpdate(BaseModel):
 
 class DataStore(BaseModel):
     """Data store model containing all collections."""
+    userSuperGroups: List[UserSuperGroup]
     userGroups: List[UserGroup]
     entities: List[Entity]
     workflowPhases: List[WorkflowPhase]
