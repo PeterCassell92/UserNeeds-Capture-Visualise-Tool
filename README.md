@@ -17,10 +17,26 @@ A flexible tool for managing and visualizing user needs across different user gr
 
 ## Quick Start
 
-### First Installation
+### Docker Installation (Recommended)
 
-When you first run the application, it will:
-1. Automatically create an empty `data.json` file
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd UserNeedsGathering
+
+# Initialize data files (first time only)
+./init-data-files.sh
+
+# Start the application
+docker-compose up -d
+
+# Access at http://localhost:3011
+```
+
+### First-Time Application Setup
+
+When you first open the application, it will:
+1. Show a welcome modal if `data.json` is empty
 2. Guide you through creating your first user group
 3. You can alternatively enable **Demo Mode** to explore with sample data
 
@@ -84,7 +100,16 @@ The easiest way to run the application is using Docker Compose:
    cd UserNeedsGathering
    ```
 
-2. **Start the application**:
+2. **Initialize data files** (first time only):
+   ```bash
+   ./init-data-files.sh
+   ```
+
+   This script ensures `data.json` and `data.demomode.json` exist before Docker tries to mount them. It's safe to run multiple times - it only creates files if they don't exist.
+
+   **Why is this needed?** Docker requires files to exist before mounting them as volumes. If you skip this step, Docker will create directories instead of files, causing mount errors.
+
+3. **Start the application**:
    ```bash
    docker-compose up -d
    ```
@@ -92,25 +117,40 @@ The easiest way to run the application is using Docker Compose:
    This will:
    - Build the backend and frontend Docker images
    - Start both services
-   - Create `data.json` if it doesn't exist
-   - Make the app available at [http://localhost:3000](http://localhost:3000)
+   - Mount your data files as volumes
+   - Make the app available at [http://localhost:3011](http://localhost:3011)
 
-3. **View logs** (optional):
+4. **View logs** (optional):
    ```bash
    docker-compose logs -f
    ```
 
-4. **Stop the application**:
+5. **Stop the application**:
    ```bash
    docker-compose down
    ```
 
-5. **Rebuild after code changes**:
+6. **Rebuild after code changes**:
    ```bash
    docker-compose up -d --build
    ```
 
 **Note:** Data files (`data.json`, `data.demomode.json`) are mounted as volumes, so your data persists even when containers are stopped or rebuilt.
+
+**Troubleshooting:** If you get mount errors about `data.json` being a directory:
+```bash
+# Stop containers and remove volumes
+docker-compose down -v
+
+# Remove the incorrectly created directory
+sudo rm -rf data.json
+
+# Re-initialize data files
+./init-data-files.sh
+
+# Start again
+docker-compose up -d
+```
 
 ### Option 2: Manual Setup
 
